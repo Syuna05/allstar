@@ -3,148 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>キャラランダム抽選v1.0</title>
+    <title>STARWARD ROULETTE Ver1.1</title>
     <style>
         :root {
-            --bg-glass: rgba(255, 255, 255, 0.15);
-            --border-glass: rgba(255, 255, 255, 0.2);
-        }
-        body {
-            font-family: "Helvetica Neue", Arial, sans-serif;
-            text-align: center; padding: 20px; margin: 0; min-height: 100vh;
-            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('bak.jpg');
-            background-size: cover; background-position: center; background-attachment: fixed; color: #fff;
+            --panel-bg: #111; 
+            --border-solid: #333;
+            --accent-red: #ff4b2b;
+            --cost-30: #007bff; 
+            --cost-25: #ff0000; 
+            --cost-20: #ffcc00; 
+            --cost-15: #28a745; 
         }
 
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            text-align: center; padding: 20px; margin: 0; min-height: 100vh;
+            background-color: #000;
+            background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('bak.jpg');
+            background-size: cover; background-position: center; background-attachment: fixed; color: #fff;
+            overflow-x: hidden;
+        }
+
+        /* 修正点：非表示用のCSSクラスを追加 */
+        .hidden { display: none !important; }
+
         .how-to-use {
-            position: absolute; top: 10px; left: 10px; text-align: left;
-            background: rgba(0, 0, 0, 0.7); padding: 15px; border-radius: 10px;
-            font-size: 13px; line-height: 1.6; max-width: 250px; border: 1px solid var(--border-glass);
-            backdrop-filter: blur(8px); z-index: 10;
+            position: fixed; top: 20px; left: 20px; text-align: left;
+            background: #111; padding: 15px; border-radius: 15px;
+            font-size: 13px; line-height: 1.6; max-width: 220px; 
+            border: 1px solid var(--border-solid); z-index: 100;
         }
 
         .controls { 
-            padding: 20px; background: var(--bg-glass); backdrop-filter: blur(10px);
-            border-radius: 12px; display: inline-block; margin: 20px 0; border: 1px solid var(--border-glass);
-            max-width: 95%; position: relative; z-index: 20;
+            padding: 20px 40px; background: var(--panel-bg);
+            border-radius: 20px; display: inline-block; margin: 20px 0; border: 1px solid var(--border-solid);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
-        .mode-select label { cursor: pointer; padding: 5px 15px; background: rgba(255,255,255,0.1); border-radius: 20px; margin: 0 5px; }
+
+        .mode-select label { cursor: pointer; padding: 8px 15px; background: #222; border-radius: 30px; margin: 0 5px; font-size: 14px; }
 
         .draw-btn { 
-            padding: 15px 60px; font-size: 22px; font-weight: bold; cursor: pointer; 
-            color: white; border: none; border-radius: 50px; transition: 0.2s; min-width: 250px;
-            position: relative; z-index: 20;
+            padding: 15px 80px; font-size: 24px; font-weight: 900; cursor: pointer; 
+            color: white; border: none; border-radius: 60px; transition: 0.2s; 
+            min-width: 280px; letter-spacing: 2px;
         }
-        .mode-start { background: linear-gradient(135deg, #ff4b2b, #ff416c); box-shadow: 0 4px 15px rgba(255,75,43,0.4); }
-        .mode-stop { background: linear-gradient(135deg, #4b6cb7, #182848); box-shadow: 0 4px 15px rgba(75,108,183,0.4); }
-        .util-btn { padding: 8px 15px; font-size: 14px; cursor: pointer; background: rgba(255,255,255,0.2); color: white; border: 1px solid white; border-radius: 4px; margin: 5px; }
+        .mode-start { background: linear-gradient(135deg, #ff4b2b, #ff416c); }
+        .mode-stop { background: linear-gradient(135deg, #4b6cb7, #182848); }
+
+        .util-btn { 
+            padding: 8px 16px; font-size: 12px; font-weight: bold; cursor: pointer; 
+            background: #333; color: white; border: 1px solid #555; border-radius: 6px; margin-left: 10px;
+        }
 
         .main-container { 
             display: flex; justify-content: center; align-items: flex-start; 
-            position: relative; margin-top: 30px; width: 100%; min-height: 600px;
+            gap: 40px; margin-top: 30px; width: 100%; position: relative;
         }
-        
-        #result-area { 
-            display: grid; 
-            gap: 15px; 
-            justify-content: center; 
-            align-content: center;
-            z-index: 5;
-        }
+
+        .result-section { flex: 0 1 auto; display: flex; flex-direction: column; align-items: center; }
+        #result-area { display: grid; gap: 20px; justify-content: center; margin-top: 10px; }
         #result-area.mode-1 { grid-template-columns: 1fr; }
-        #result-area.mode-4 { grid-template-columns: repeat(2, min-content); }
+        #result-area.mode-4 { grid-template-columns: repeat(2, 300px); }
 
         .card { 
-            background: rgba(255, 255, 255, 0.95); padding: 15px; border-radius: 12px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6); width: 308px; color: #333; 
-            animation: popIn 0.1s ease-out;
+            background: #ffffff; padding: 15px; border-radius: 15px; 
+            width: 280px; color: #1a1a1a; border: 1px solid #ddd;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
         }
 
-        @keyframes popIn { from { transform: scale(0.99); } to { transform: scale(1); } }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; min-height: 25px; }
+        .cost-badge { color: #fff; padding: 4px 10px; border-radius: 5px; font-weight: 900; font-size: 12px; }
+        .cost-30 { background-color: var(--cost-30); }
+        .cost-25 { background-color: var(--cost-25); }
+        .cost-20 { background-color: var(--cost-20); color: #000; }
+        .cost-15 { background-color: var(--cost-15); }
 
-        /* 履歴エリアをスッキリ4件分に */
+        .kakusei-badge { padding: 4px 10px; font-size: 12px; font-weight: 900; border-radius: 5px; color: white; }
+
+        .image-container { width: 100%; border-radius: 10px; overflow: hidden; background: #000; height: 320px; display: flex; align-items: center; justify-content: center; }
+        img { width: 100%; height: 100%; object-fit: contain; }
+
         .history-area { 
-            position: absolute; right: 10px; top: 0;
-            width: 180px; background: rgba(0, 0, 0, 0.5); border-radius: 15px; 
-            padding: 12px; border: 1px solid var(--border-glass); text-align: left;
-            backdrop-filter: blur(5px);
+            width: 220px; background: #111; border-radius: 15px; padding: 20px; 
+            border: 1px solid var(--border-solid); text-align: left;
         }
+        .history-title { font-size: 13px; font-weight: 900; color: var(--accent-red); margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .history-item { color: #fff; margin-bottom: 8px; padding: 10px; border-radius: 8px; background: #1a1a1a; border-left: 4px solid #444; font-size: 12px; }
+        .hist-30 { border-left-color: var(--cost-30); }
+        .hist-25 { border-left-color: var(--cost-25); }
+        .hist-20 { border-left-color: var(--cost-20); }
+        .hist-15 { border-left-color: var(--cost-15); }
 
-        .image-container { width: 100%; border-radius: 6px; overflow: hidden; background: #000; height: 340px; display: flex; align-items: center; justify-content: center; }
-        img { max-width: 100%; max-height: 100%; }
-        
-        .kakusei-badge { display: inline-block; padding: 3px 12px; font-size: 15px; font-weight: bold; border-radius: 4px; color: white; margin-bottom: 8px; }
-        .kakusei-B { background: #808080; } .kakusei-F { background: #ff0000; } .kakusei-S { background: #0000ff; } 
-        .kakusei-M { background: #ffcc00; color: #000; } .kakusei-D { background: #008000; }
-        .hidden { display: none !important; }
+        #filter-panel { display: none; background: #0a0a0a; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; overflow-y: auto; padding: 40px; box-sizing: border-box; }
+        .filter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; margin-top: 20px; }
+        .char-select-card { cursor: pointer; background: #111; border-radius: 8px; overflow: hidden; border: 2px solid #333; }
+        .char-select-card img { width: 100%; height: 110px; object-fit: cover; }
+        .char-select-card .name-tag { background: #000; color: #fff; font-size: 11px; padding: 5px 2px; text-align: center; }
+        .char-select-card.disabled { opacity: 0.2; filter: grayscale(1); }
 
-        #filter-panel {
-            display: none; background: rgba(20,20,20,0.98); position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 100; overflow-y: auto; padding: 20px; box-sizing: border-box;
-        }
-        .filter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; }
-        .char-select-card { cursor: pointer; background: #000; border-radius: 8px; overflow: hidden; }
-        .char-select-card.disabled { filter: grayscale(1) brightness(0.3); }
-
-        .history-item { color: #fff; margin-bottom: 6px; padding: 6px; border-radius: 6px; font-size: 11px; border-left: 3px solid transparent; overflow: hidden; white-space: nowrap; }
-        .hist-30 { border-left-color: #4b6cb7; background: rgba(75, 108, 183, 0.25); }
-        .hist-25 { border-left-color: #ff4b2b; background: rgba(255, 75, 43, 0.25); }
-        .hist-20 { border-left-color: #ffcc00; background: rgba(255, 204, 0, 0.20); }
-        .hist-15 { border-left-color: #2ecc71; background: rgba(46, 204, 113, 0.20); }
-
-        @media screen and (max-width: 900px) {
-            #result-area.mode-4 { grid-template-columns: 1fr; }
-            .history-area { position: static; width: 280px; margin: 20px auto; }
-            .how-to-use { position: static; max-width: 90%; margin: 0 auto 20px; }
+        @media screen and (max-width: 1000px) {
             .main-container { flex-direction: column; align-items: center; }
-            .card { width: 90vw; }
+            #result-area.mode-4 { grid-template-columns: 1fr; }
+            .history-area { width: 90%; }
         }
     </style>
 </head>
 <body>
 
     <div class="how-to-use">
-        <h4>使い方説明</h4>
-        <p>1. キャラ選択設定から持っているキャラを選びます</p>
-        <p>2. モード（1体 or 4体）を選択します</p>
-        <p>3. 抽選スタート！ → ストップ！で決定</p>
+        <h4 style="margin-top:0;">GUIDE</h4>
+        <p>1. <b>設定</b>から所持キャラを確認</p>
+        <p>2. モード（1体 / 4体）を選択</p>
+        <p>3. <b>START</b>で開始 → <b>STOP</b></p>
     </div>
 
-    <h1>キャラランダム抽選v1.0</h1>
+    <h1 style="font-weight: 900; letter-spacing: 4px; margin-bottom: 0;">STARWARD ROULETTE <span style="color: var(--accent-red);">Ver1.1</span></h1>
 
     <div class="controls">
-        <div class="mode-select" style="margin-bottom:15px; font-weight:bold;">
-            モード：
-            <label><input type="radio" name="play-mode" value="1" checked onchange="saveOptions()"> <span>カジュアル (1体)</span></label>
-            <label><input type="radio" name="play-mode" value="4" onchange="saveOptions()"> <span>BANピック (4体)</span></label>
+        <div class="mode-select" style="margin-bottom:15px;">
+            <label><input type="radio" name="play-mode" value="1" checked onchange="saveOptions()"> <span>CASUAL (1)</span></label>
+            <label><input type="radio" name="play-mode" value="4" onchange="saveOptions()"> <span>BAN PICK (4)</span></label>
         </div>
         <div class="option-group">
-            <label style="cursor: pointer; margin-right: 15px; font-size: 1.1rem;">
-                <input type="checkbox" id="kakusei-toggle" checked onchange="saveOptions()"> 覚醒表示
+            <label style="cursor: pointer; margin-right: 20px; font-weight: bold;">
+                <input type="checkbox" id="kakusei-toggle" checked onchange="saveOptions(); updateDisplayAfterToggle();"> 覚醒表示
             </label>
-            <button class="util-btn" onclick="openFilter()" style="background: #4b6cb7;">キャラ選択設定</button>
+            <button class="util-btn" onclick="openFilter()" style="padding: 10px 20px;">キャラ選択設定</button>
         </div>
     </div>
 
-    <div>
-        <button id="main-btn" class="draw-btn mode-start" onclick="toggleRoulette()">抽選スタート！</button>
-    </div>
+    <div><button id="main-btn" class="draw-btn mode-start" onclick="toggleRoulette()">START!</button></div>
 
     <div class="main-container">
-        <div id="result-area" class="mode-1">
-            <p style="color: #aaa;">READY</p>
+        <div class="result-section">
+            <div style="font-size: 12px; color: #888; font-weight: bold; letter-spacing: 2px; margin-bottom: 5px;">CURRENT SELECTION</div>
+            <div id="result-area" class="mode-1">
+                <div style="opacity: 0.2; font-size: 30px; margin-top: 50px;">READY</div>
+            </div>
         </div>
+
         <div class="history-area">
-            <div style="font-size:12px; color:#ccc; border-bottom:1px solid #555; margin-bottom:10px;">最近の結果 (最大4件)</div>
-            <div id="history-list"></div>
+            <div class="history-title">PREVIOUS LOGS</div>
+            <div id="history-list">
+                <div style="opacity: 0.3; font-size: 11px; text-align: center;">No History</div>
+            </div>
         </div>
     </div>
 
     <div id="filter-panel">
-        <div style="position: sticky; top: 0; background: rgba(20,20,20,0.95); padding: 15px; z-index: 110; border-bottom: 1px solid #444;">
-            <button class="util-btn" style="background:#e74c3c; padding: 10px 40px; font-weight: bold;" onclick="closeFilter()">設定を完了する</button>
+        <div style="position: sticky; top: 0; background: #0a0a0a; padding: 20px; z-index: 1100; border-bottom: 1px solid #333;">
+            <button class="draw-btn mode-start" style="padding: 10px 40px; font-size: 16px; min-width: auto;" onclick="closeFilter()">SAVE & CLOSE</button>
         </div>
-        <div id="filter-content" style="padding: 20px;"></div>
+        <div id="filter-content"></div>
     </div>
 
     <script>
@@ -154,8 +164,7 @@
             "20": "kuro:黒ガラハッド Aida:アイーダ Beta:ベータ Borzoi:ボルゾイ Breaker:ブリーカー Darkstar:ダークスター Deucalion:デュカリオン Emika:エミカ Franca:フランカー Hibiki:ヒビキ ice:アイスリン Kitty:キャッティ Pallas:パラス Qingni:チンニ Seraph:セラフ Scorpion:スコーピオン suteko:スティレット Virtues:ヴァーチェ Zakharova:ザハロワ",
             "15": "Katerina:カタリナ Orchid:オーキッド Roland:ローランド Snowowl:スノーウォル Yammyn:ヤミン"
         };
-        const kakuseiList = [{id:"B",name:"B覚醒"},{id:"F",name:"F覚醒"},{id:"S",name:"S覚醒"},{id:"M",name:"M覚醒"},{id:"D",name:"D覚醒"}];
-        
+        const kakuseiList = [{id:"B",name:"B覚醒",c:"#555"},{id:"F",name:"F覚醒",c:"#e74c3c"},{id:"S",name:"S覚醒",c:"#3498db"},{id:"M",name:"M覚醒",c:"#f1c40f"},{id:"D",name:"D覚醒",c:"#2ecc71"}];
         let allChars = [];
         let history = [];
         let rouletteTimer = null;
@@ -164,16 +173,16 @@
 
         function init() {
             const savedChars = JSON.parse(localStorage.getItem('roulette_enabled_chars')) || {};
-            const savedOptions = JSON.parse(localStorage.getItem('roulette_options')) || { kakusei: true, mode: "1" };
-            document.getElementById('kakusei-toggle').checked = savedOptions.kakusei;
-            const modeRadio = document.querySelector(`input[name="play-mode"][value="${savedOptions.mode}"]`);
-            if (modeRadio) modeRadio.checked = true;
-
             const filterContent = document.getElementById('filter-content');
             ["30", "25", "20", "15"].forEach(cost => {
                 const section = document.createElement('div');
-                section.className = 'filter-section';
-                section.innerHTML = `<div style="padding:10px; border-bottom:1px solid #444; margin-bottom:15px; text-align:left;"><strong style="color:#ff4b2b; font-size:1.2rem;">COST ${cost}</strong> <button class="util-btn" onclick="toggleCostGroup('${cost}', true)">ALL</button><button class="util-btn" onclick="toggleCostGroup('${cost}', false)">全解除</button></div><div class="filter-grid" id="grid-${cost}"></div>`;
+                section.innerHTML = `
+                    <div style="display:flex; align-items:center; margin-top:30px; border-bottom:1px solid #333; padding-bottom:10px;">
+                        <h2 style="margin:0; color:var(--accent-red); font-size:1.5rem;">COST ${cost}</h2>
+                        <button class="util-btn" onclick="toggleCostGroup('${cost}', true)">ALL</button>
+                        <button class="util-btn" onclick="toggleCostGroup('${cost}', false)">CLEAR</button>
+                    </div>
+                    <div class="filter-grid" id="grid-${cost}"></div>`;
                 filterContent.appendChild(section);
                 const grid = section.querySelector(`#grid-${cost}`);
                 rawData[cost].trim().split(/\s+/).forEach(pair => {
@@ -186,23 +195,15 @@
                     card.className = 'char-select-card' + (isEnabled ? '' : ' disabled');
                     card.id = `card-${charId}`;
                     card.onclick = () => { charObj.enabled = !charObj.enabled; card.classList.toggle('disabled'); saveToStorage(); };
-                    card.innerHTML = `<img src="./${cost}/${encodeURIComponent(file)}.png" onerror="this.src='https://placehold.co/100x120?text=No+Img'"><div style="font-size:10px; text-align:center; padding:3px; background:#111;">${name}</div>`;
+                    card.innerHTML = `<img src="./${cost}/${encodeURIComponent(file)}.png" onerror="this.src='https://placehold.co/100x120?text=No+Img'"><div class="name-tag">${name}</div>`;
                     grid.appendChild(card);
                 });
             });
         }
 
-        function saveToStorage() {
-            const charStatus = {};
-            allChars.forEach(c => { charStatus[c.id] = c.enabled; });
-            localStorage.setItem('roulette_enabled_chars', JSON.stringify(charStatus));
-        }
-
-        function saveOptions() {
-            const modeInput = document.querySelector('input[name="play-mode"]:checked');
-            const mode = modeInput ? modeInput.value : "1";
-            const options = { kakusei: document.getElementById('kakusei-toggle').checked, mode: mode };
-            localStorage.setItem('roulette_options', JSON.stringify(options));
+        // チェックボックス切り替え時に即座に表示を反映する関数を追加
+        function updateDisplayAfterToggle() {
+            if (currentSelections.length > 0) renderCards();
         }
 
         function toggleCostGroup(cost, status) {
@@ -213,31 +214,44 @@
             saveToStorage();
         }
 
+        function saveToStorage() {
+            const charStatus = {};
+            allChars.forEach(c => { charStatus[c.id] = c.enabled; });
+            localStorage.setItem('roulette_enabled_chars', JSON.stringify(charStatus));
+        }
+
+        function saveOptions() {
+            const modeInput = document.querySelector('input[name="play-mode"]:checked');
+            localStorage.setItem('roulette_options', JSON.stringify({ kakusei: document.getElementById('kakusei-toggle').checked, mode: modeInput ? modeInput.value : "1" }));
+        }
+
         function openFilter() { document.getElementById('filter-panel').style.display = 'block'; }
         function closeFilter() { document.getElementById('filter-panel').style.display = 'none'; }
-        function toggleRoulette() { if (isRunning) stopRoulette(); else startRoulette(); }
+        
+        function toggleRoulette() { 
+            if (isRunning) {
+                stopRoulette();
+            } else {
+                if (currentSelections.length > 0) { history = [...currentSelections]; updateHistoryDisplay(); }
+                startRoulette();
+            }
+        }
 
         function startRoulette() {
             const candidates = allChars.filter(c => c.enabled);
             const modeInput = document.querySelector('input[name="play-mode"]:checked');
             const mode = modeInput ? parseInt(modeInput.value) : 1;
-            if (candidates.length < mode) { alert(`キャラを${mode}体以上選んでください！`); return; }
-
+            if (candidates.length < mode) { alert(`キャラを${mode}体以上選択してください`); return; }
             isRunning = true;
-            document.getElementById('main-btn').innerText = "ストップ！";
+            document.getElementById('main-btn').innerText = "STOP!";
             document.getElementById('main-btn').className = "draw-btn mode-stop";
-            
-            const resArea = document.getElementById("result-area");
-            resArea.className = (mode === 4) ? "mode-4" : "mode-1";
-
+            document.getElementById("result-area").className = (mode === 4) ? "mode-4" : "mode-1";
             rouletteTimer = setInterval(() => {
                 currentSelections = [];
                 const tempCandidates = [...candidates];
                 for(let i=0; i<mode; i++) {
                     const idx = Math.floor(Math.random() * tempCandidates.length);
-                    const char = tempCandidates.splice(idx, 1)[0];
-                    const kakusei = kakuseiList[Math.floor(Math.random() * kakuseiList.length)];
-                    currentSelections.push({ char, kakusei });
+                    currentSelections.push({ char: tempCandidates.splice(idx, 1)[0], kakusei: kakuseiList[Math.floor(Math.random() * kakuseiList.length)] });
                 }
                 renderCards();
             }, 60);
@@ -246,40 +260,29 @@
         function stopRoulette() {
             clearInterval(rouletteTimer);
             isRunning = false;
-            document.getElementById('main-btn').innerText = "抽選スタート！";
+            document.getElementById('main-btn').innerText = "START!";
             document.getElementById('main-btn').className = "draw-btn mode-start";
-            
-            if (currentSelections.length > 0) {
-                currentSelections.forEach(item => {
-                    history.unshift(item);
-                    // 履歴を最大4件に制限
-                    if (history.length > 4) history.pop();
-                });
-                updateHistoryDisplay();
-            }
         }
 
         function renderCards() {
             const isKakuseiVisible = document.getElementById('kakusei-toggle').checked;
-            const resultArea = document.getElementById("result-area");
-            resultArea.innerHTML = currentSelections.map(item => `
+            document.getElementById("result-area").innerHTML = currentSelections.map(item => `
                 <div class="card">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                         <span class="cost-badge">COST ${item.char.cost}</span>
-                         <span class="kakusei-badge kakusei-${item.kakusei.id} ${isKakuseiVisible ? '' : 'hidden'}">${item.kakusei.name}</span>
+                    <div class="card-header">
+                         <span class="cost-badge cost-${item.char.cost}">COST ${item.char.cost}</span>
+                         <span class="kakusei-badge ${isKakuseiVisible ? '' : 'hidden'}" style="background:${item.kakusei.c}">${item.kakusei.name}</span>
                     </div>
-                    <div style="font-size:20px; font-weight:bold; margin-bottom:8px;">${item.char.name}</div>
-                    <div class="image-container">
-                        <img src="./${item.char.cost}/${encodeURIComponent(item.char.file)}.png" onerror="this.src='https://placehold.co/300x350?text=No+Image'">
-                    </div>
-                </div>
-            `).join('');
+                    <div style="font-size:18px; font-weight:900; margin-bottom:10px; color:#000;">${item.char.name}</div>
+                    <div class="image-container"><img src="./${item.char.cost}/${encodeURIComponent(item.char.file)}.png" onerror="this.src='https://placehold.co/300x350?text=No+Image'"></div>
+                </div>`).join('');
         }
 
         function updateHistoryDisplay() {
             document.getElementById('history-list').innerHTML = history.map(item => `
-                <div class="history-item hist-${item.char.cost}"><b>${item.char.name}</b> <small>C${item.char.cost}</small></div>
-            `).join('');
+                <div class="history-item hist-${item.char.cost}">
+                    <strong>${item.char.name}</strong><br>
+                    <small>COST ${item.char.cost} / ${item.kakusei.name}</small>
+                </div>`).join('');
         }
 
         init();
